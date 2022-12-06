@@ -1,5 +1,3 @@
-import * as dotenv from 'dotenv' 
-dotenv.config();
 import * as azdev from "azure-devops-node-api";
 
 export async function getAzureDevOpsProvider(orgUrl, token) {
