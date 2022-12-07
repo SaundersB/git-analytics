@@ -1,6 +1,8 @@
 import * as dotenv from 'dotenv' 
 dotenv.config();
 import { getAzureDevOpsProvider } from './git-tool-providers/azure-dev-ops.mjs';
+import { open } from 'sqlite'
+import { openDb } from './db.js';
 
 let orgUrl = process.env.ORG_URL
 let token = process.env.AZURE_PERSONAL_ACCESS_TOKEN
@@ -14,3 +16,6 @@ console.log(commits.length);
 
 // const pullRequests = await gitApiObject.getPullRequests(repoId, {}, project);
 // console.log(pullRequests);        
+
+
+const db = await openDb();
