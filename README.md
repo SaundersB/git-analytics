@@ -13,8 +13,7 @@ node migrate.mjs
 
 ## Analysis
 
-```
-javascript
+```javascript
 nvm install
 nvm use
 node index.mjs
