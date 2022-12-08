@@ -10,9 +10,25 @@ const project = process.env.PROJECT_NAME
 
 let gitApiObject = await getAzureDevOpsProvider(orgUrl, token);
 
-const commits = await gitApiObject.getCommits(repoId, {$skip: 0, $top: 15000}, project)
+const commits = await gitApiObject.getCommits(repoId, {$skip: 0, $top: 5}, project)
 console.log(commits);        
 
 // const pullRequests = await gitApiObject.getPullRequests(repoId, {}, project);
 // console.log(pullRequests);        
 
+
+const db = await openDb();
+console.log(`Importing ${commits.length} commits`)
+commits.map(async (commit) => {
+    const author = await db.get('SELECT * FROM authors WHERE email = ?;', commit.committer.email);
+    console.log(`author`, author)
+
+    if(!author) {
+        await db.run(
+            'INSERT INTO authors (name, email, createDate) VALUES (?, ?, ?);', 
+            commit.committer.name, 
+            commit.committer.email, 
+            commit.committer.date
+        )
+    }
+})
