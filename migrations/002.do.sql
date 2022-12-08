@@ -1,5 +1,6 @@
 CREATE TABLE commits
 (
+  id INTEGER PRIMARY KEY,
   commitId varchar(255),
   authorId INTEGER,
   committerId INTEGER,
