@@ -12,7 +12,7 @@ const project = process.env.PROJECT_NAME
 let gitApiObject = await getAzureDevOpsProvider(orgUrl, token);
 
 const commits = await gitApiObject.getCommits(repoId, {$skip: 0, $top: 15000}, project)
-console.log(commits.length);        
+console.log(commits);        
 
 // const pullRequests = await gitApiObject.getPullRequests(repoId, {}, project);
 // console.log(pullRequests);        
