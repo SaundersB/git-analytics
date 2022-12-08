@@ -1,7 +1,6 @@
 import * as dotenv from 'dotenv' 
 dotenv.config();
 import { getAzureDevOpsProvider } from './git-tool-providers/azure-dev-ops.mjs';
-import { open } from 'sqlite'
 import { openDb } from './db.mjs';
 
 let orgUrl = process.env.ORG_URL
