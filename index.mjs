@@ -16,5 +16,3 @@ console.log(commits);
 // const pullRequests = await gitApiObject.getPullRequests(repoId, {}, project);
 // console.log(pullRequests);        
 
-
-const db = await openDb();
