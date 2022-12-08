@@ -1,4 +1,3 @@
-import Postgrator from "postgrator";
 import { openDb } from './db.mjs';
 
 async function main() {
