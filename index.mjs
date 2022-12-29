@@ -9,9 +9,15 @@ const repoId = process.env.REPO_ID
 const project = process.env.PROJECT_NAME
 
 try {
-    let gitApiObject = await getAzureDevOpsProvider(orgUrl, token); 
+    let gitApiObject = await getAzureDevOpsProvider(orgUrl, token)
     const commits = await gitApiObject.getCommits(repoId, {$skip: 0, $top: 15000}, project)
-    console.log(commits);        
+    if(commits && commits.length) {
+        let reviewers = {}
+        commits.forEach((commit) => {
+            reviewers[commit.author.name] ? reviewers[commit.author.name]++ : reviewers[commit.author.name] = 1
+        })
+        console.log(reviewers)
+    }
 } catch (error) {
     console.error(error)
 }
