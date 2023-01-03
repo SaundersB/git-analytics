@@ -1,7 +1,6 @@
-import * as dotenv from 'dotenv' 
-dotenv.config();
 import { getCommitersByName } from './git-tool-providers/azure-dev-ops.mjs';
-import { openDb } from './db.mjs';
+// import { openDb } from './db.mjs';
+// import { importCommits } from './importData.mjs';
 
 try {
     let commiters = await getCommitersByName()
@@ -10,6 +9,5 @@ try {
     console.error(error)
 }
 
-// const pullRequests = await gitApiObject.getPullRequests(repoId, {}, project);
-// console.log(pullRequests);        
-
+// const db = await openDb();
+// await importCommits(db, commits);
