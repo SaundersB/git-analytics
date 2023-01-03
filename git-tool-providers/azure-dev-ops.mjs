@@ -1,4 +1,11 @@
 import * as azdev from "azure-devops-node-api";
+import * as dotenv from 'dotenv' 
+dotenv.config('../env');
+
+const orgUrl = process.env.ORG_URL
+const token = process.env.AZURE_PERSONAL_ACCESS_TOKEN
+const repoId = process.env.REPO_ID
+const project = process.env.PROJECT_NAME
 
 export async function getAzureDevOpsProvider(orgUrl, token) {
     let authHandler = azdev.getPersonalAccessTokenHandler(token); 
@@ -10,7 +17,7 @@ export async function getAzureDevOpsProvider(orgUrl, token) {
 export async function getCommitersByName() {
     let gitApiObject = await getAzureDevOpsProvider(orgUrl, token)
     const commits = await gitApiObject.getCommits(repoId, {$skip: 0, $top: 15000}, project)
-
+    
     if(commits && commits.length) {
         let commiters = {}
 
@@ -18,7 +25,9 @@ export async function getCommitersByName() {
             commiters[commit.author.name] ? 
                 commiters[commit.author.name].commitCount++ : commiters[commit.author.name] = { commitCount : 1 }
         })
-    }
 
-    return commiters
+        return commiters
+    }
+    
+    return null
 }

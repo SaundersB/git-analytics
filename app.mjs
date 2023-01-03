@@ -1,6 +1,4 @@
 import express from 'express';
-import * as dotenv from 'dotenv' 
-dotenv.config();
 import { getCommitersByName } from './git-tool-providers/azure-dev-ops.mjs';
 
 const app = express();
