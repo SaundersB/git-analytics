@@ -86,7 +86,7 @@ export async function getCommitersByName() {
   return null
 }
 
-export async function getPrsByOpenandReview(orgUrl, token) {
+export async function getPrsByOpenandReview() {
   let gitApiObject = await getAzureDevOpsProvider(orgUrl, token)
   const getPrs = async projectName =>
     gitApiObject.getPullRequestsByProject(
@@ -99,7 +99,9 @@ export async function getPrsByOpenandReview(orgUrl, token) {
       0,
       15000
     )
-  const prs = await Promise.all(projects.map(project => getPrs(project)))
+  const prs = (
+    await Promise.all(projects.map(project => getPrs(project)))
+  ).flat()
 
   if (prs && prs.length) {
     const prsStats = prs.reduce(
