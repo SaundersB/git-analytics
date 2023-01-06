@@ -3,3 +3,4 @@ node_modules
 *.mock.js
 database.db
 userMapping.mjs
+stats.json

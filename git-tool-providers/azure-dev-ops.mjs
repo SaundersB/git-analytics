@@ -6,10 +6,13 @@ import { userMapping } from '../userMapping.mjs'
 
 const orgUrl = process.env.ORG_URL
 const token = process.env.AZURE_PERSONAL_ACCESS_TOKEN
+const fromDate = process.env.FROM_DATE
+const maxToFetch = process.env.MAX_COMMITS
 const projects = process.env.PROJECT_NAMES.split(', ')
-const t = 'days between commits'
-const recent = `sum of all ${t}`
-const avgDays = `avg ${t}`
+
+const DAYS_BETWEEN_COMMITS = 'days between commits'
+const SUM_DAYS_BETWEEN_COMMITS = `sum of all ${DAYS_BETWEEN_COMMITS}`
+const AVG_DAYS_BETWEEN_COMMITS = `avg ${DAYS_BETWEEN_COMMITS}`
 
 export async function getAzureDevOpsProvider(orgUrl, token) {
   let authHandler = azdev.getPersonalAccessTokenHandler(token)
@@ -18,31 +21,37 @@ export async function getAzureDevOpsProvider(orgUrl, token) {
 
   return gitApiObject
 }
+export const getRepositoryNames = async projectName => {
+  const gitApiObject = await getAzureDevOpsProvider(orgUrl, token)
+  return gitApiObject.getRepositories(projectName)
+}
 
 export async function getCommitersByName() {
   let gitApiObject = await getAzureDevOpsProvider(orgUrl, token)
   const getCommits = async projectName => {
-    const repos = await gitApiObject.getRepositories(projectName)
-    const repoNames = repos.map(repo => repo.name)
+    const repos = await getRepositoryNames(projectName)
+
     return (
       await Promise.all(
-        repoNames.map(repoName =>
+        repos.map(({ name: repoName }) =>
           gitApiObject.getCommits(
             repoName,
             {
-              fromDate: '01/01/2022 12:00:00 AM'
+              fromDate
             },
             projectName,
             0,
-            150000
+            maxToFetch
           )
         )
       )
     ).flat()
   }
+
   const commits = (
     await Promise.all(projects.map(project => getCommits(project)))
   ).flat()
+
   if (commits && commits.length) {
     let commiters = {}
     for (const commit of commits) {
@@ -51,30 +60,30 @@ export async function getCommitersByName() {
 
         const name = userMapping[author] ?? author
         if (commiters[name]) {
-          const start = DateTime.fromJSDate(
-            commiters[name].mostRecentCommitDate
-          )
+          const start = DateTime.fromJSDate(commiters[name].commitDates.at(-1))
           const end = DateTime.fromJSDate(commit.author.date)
 
-          // find the interval between commit dates
-          commiters[name][recent] += start.diff(end, 'days').toObject().days
+          // find the interval between commit dates and ensure positive
+          commiters[name][SUM_DAYS_BETWEEN_COMMITS] += Math.abs(
+            start.diff(end, 'days').toObject().days
+          )
           // running avg of the commit interval in days. done before count++ since intervals will always be one less than count.
-          commiters[name][avgDays] =
-            commiters[name][recent] / commiters[name].count
+          commiters[name][AVG_DAYS_BETWEEN_COMMITS] =
+            commiters[name][SUM_DAYS_BETWEEN_COMMITS] / commiters[name].count
 
           // iterate count
           commiters[name].count++
           // reassign date to current objects date
-          commiters[name].mostRecentCommitDate = commit.author.date
+          commiters[name].commitDates.push(commit.author.date)
           commiters[name].changeCounts.Add += commit.changeCounts.Add
           commiters[name].changeCounts.Edit += commit.changeCounts.Edit
           commiters[name].changeCounts.Delete += commit.changeCounts.Delete
         } else
           commiters[name] = {
             count: 1,
-            mostRecentCommitDate: commit.author.date,
-            [recent]: 0,
-            [avgDays]: 0,
+            commitDates: [commit.author.date],
+            [SUM_DAYS_BETWEEN_COMMITS]: 0,
+            [AVG_DAYS_BETWEEN_COMMITS]: 0,
             changeCounts: commit.changeCounts
           }
       }
@@ -93,11 +102,11 @@ export async function getPrsByOpenandReview() {
       projectName,
       {
         status: 'Completed',
-        fromDate: '01/01/2022 12:00:00 AM'
+        fromDate
       },
       undefined,
       0,
-      15000
+      maxToFetch
     )
   const prs = (
     await Promise.all(projects.map(project => getPrs(project)))
