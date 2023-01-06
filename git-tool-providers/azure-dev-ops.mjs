@@ -25,12 +25,10 @@ const SUM_DAYS_BETWEEN_COMMITS = `sum of all ${DAYS_BETWEEN_COMMITS}`
 const AVG_DAYS_BETWEEN_COMMITS = `avg ${DAYS_BETWEEN_COMMITS}`
 
 export const getRepositoryNames = async projectName => {
-  // const gitApiObject = await getAzureDevOpsProvider(orgUrl, token)
   return gitApiObject.getRepositories(projectName)
 }
 
 export const getAllCommits = async projectName => {
-  // const gitApiObject = await getAzureDevOpsProvider(orgUrl, token)
   const repos = await getRepositoryNames(projectName)
 
   return (
@@ -104,6 +102,7 @@ export async function getAllCommitersByName() {
 
   return processCommits(commits)
 }
+/*End functions with commits*/
 
 // Functions dealing with PRS
 
@@ -113,7 +112,6 @@ export async function getAllCommitersByName() {
  */
 
 export async function getPrsByOpenandReview() {
-  // let gitApiObject = await getAzureDevOpsProvider(orgUrl, token)
   const getPrs = async projectName =>
     gitApiObject.getPullRequestsByProject(
       projectName,
