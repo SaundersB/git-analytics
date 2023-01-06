@@ -6,13 +6,6 @@ import { userMapping } from '../userMapping.mjs'
 
 const orgUrl = process.env.ORG_URL
 const token = process.env.AZURE_PERSONAL_ACCESS_TOKEN
-const fromDate = process.env.FROM_DATE
-const maxToFetch = process.env.MAX_COMMITS
-const projects = process.env.PROJECT_NAMES.split(', ')
-
-const DAYS_BETWEEN_COMMITS = 'days between commits'
-const SUM_DAYS_BETWEEN_COMMITS = `sum of all ${DAYS_BETWEEN_COMMITS}`
-const AVG_DAYS_BETWEEN_COMMITS = `avg ${DAYS_BETWEEN_COMMITS}`
 
 export async function getAzureDevOpsProvider(orgUrl, token) {
   let authHandler = azdev.getPersonalAccessTokenHandler(token)
@@ -21,37 +14,47 @@ export async function getAzureDevOpsProvider(orgUrl, token) {
 
   return gitApiObject
 }
+// made this a const since I was recalling it a bunch
+const gitApiObject = await getAzureDevOpsProvider(orgUrl, token)
+
+const fromDate = process.env.FROM_DATE
+const maxToFetch = process.env.MAX_RECORDS
+const projects = process.env.PROJECT_NAMES.split(', ')
+const DAYS_BETWEEN_COMMITS = 'days between commits'
+const SUM_DAYS_BETWEEN_COMMITS = `sum of all ${DAYS_BETWEEN_COMMITS}`
+const AVG_DAYS_BETWEEN_COMMITS = `avg ${DAYS_BETWEEN_COMMITS}`
+
 export const getRepositoryNames = async projectName => {
-  const gitApiObject = await getAzureDevOpsProvider(orgUrl, token)
+  // const gitApiObject = await getAzureDevOpsProvider(orgUrl, token)
   return gitApiObject.getRepositories(projectName)
 }
 
-export async function getCommitersByName() {
-  let gitApiObject = await getAzureDevOpsProvider(orgUrl, token)
-  const getCommits = async projectName => {
-    const repos = await getRepositoryNames(projectName)
+export const getAllCommits = async projectName => {
+  // const gitApiObject = await getAzureDevOpsProvider(orgUrl, token)
+  const repos = await getRepositoryNames(projectName)
 
-    return (
-      await Promise.all(
-        repos.map(({ name: repoName }) =>
-          gitApiObject.getCommits(
-            repoName,
-            {
-              fromDate
-            },
-            projectName,
-            0,
-            maxToFetch
-          )
-        )
+  return (
+    await Promise.all(
+      repos.map(({ name: repoName }) =>
+        getCommitsByRepository(projectName, repoName)
       )
-    ).flat()
-  }
-
-  const commits = (
-    await Promise.all(projects.map(project => getCommits(project)))
+    )
   ).flat()
+}
 
+export const getCommitsByRepository = async (projectName, repositoryName) => {
+  return gitApiObject.getCommits(
+    repositoryName,
+    {
+      fromDate
+    },
+    projectName,
+    0,
+    maxToFetch
+  )
+}
+
+export const processCommits = commits => {
   if (commits && commits.length) {
     let commiters = {}
     for (const commit of commits) {
@@ -91,12 +94,26 @@ export async function getCommitersByName() {
 
     return commiters
   }
-
   return null
 }
 
+export async function getAllCommitersByName() {
+  const commits = (
+    await Promise.all(projects.map(project => getAllCommits(project)))
+  ).flat()
+
+  return processCommits(commits)
+}
+
+// Functions dealing with PRS
+
+/**
+ * PR Stats, stats prs opened by an individual, and stats on people who reviewed prs
+ * @returns Object {open: {}, reviewers:{}}
+ */
+
 export async function getPrsByOpenandReview() {
-  let gitApiObject = await getAzureDevOpsProvider(orgUrl, token)
+  // let gitApiObject = await getAzureDevOpsProvider(orgUrl, token)
   const getPrs = async projectName =>
     gitApiObject.getPullRequestsByProject(
       projectName,

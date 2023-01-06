@@ -1,11 +1,13 @@
 import {
-  getCommitersByName,
-  getPrsByOpenandReview
+  getAllCommitersByName,
+  getPrsByOpenandReview,
+  getCommitsByRepository,
+  processCommits
 } from './git-tool-providers/azure-dev-ops.mjs'
 import fs from 'fs'
 
 try {
-  const commiters = await getCommitersByName()
+  const commiters = await getAllCommitersByName()
   // console.log(commiters)
 
   const prsStats = await getPrsByOpenandReview()
