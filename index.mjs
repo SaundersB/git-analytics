@@ -1,13 +1,18 @@
-import { getCommitersByName } from './git-tool-providers/azure-dev-ops.mjs';
-// import { openDb } from './db.mjs';
-// import { importCommits } from './importData.mjs';
+import {
+  getAllCommitersByName,
+  getPrsByOpenandReview
+} from './git-tool-providers/azure-dev-ops.mjs'
+import fs from 'fs'
 
 try {
-    let commiters = await getCommitersByName()
-    console.log(commiters)
-} catch (error) {
-    console.error(error)
-}
+  const commiters = await getAllCommitersByName()
+  // console.log(commiters)
 
-// const db = await openDb();
-// await importCommits(db, commits);
+  const prsStats = await getPrsByOpenandReview()
+  // console.log(prsStats)
+  const stats = { prs: prsStats, commits: commiters }
+  // console.log(stats)
+  fs.writeFileSync('./stats.json', JSON.stringify(stats, null, 2))
+} catch (error) {
+  console.error(error)
+}
