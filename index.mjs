@@ -1,8 +1,6 @@
 import {
   getAllCommitersByName,
-  getPrsByOpenandReview,
-  getCommitsByRepository,
-  processCommits
+  getPrsByOpenandReview
 } from './git-tool-providers/azure-dev-ops.mjs'
 import fs from 'fs'
 
