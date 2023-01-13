@@ -7,7 +7,7 @@ import { userMapping } from '../userMapping.mjs'
 const orgUrl = process.env.ORG_URL
 const token = process.env.AZURE_PERSONAL_ACCESS_TOKEN
 
-export async function getAzureDevOpsProvider(orgUrl, token) {
+export async function getAzureDevOpsProvider() {
   let authHandler = azdev.getPersonalAccessTokenHandler(token)
   let webApi = new azdev.WebApi(orgUrl, authHandler)
   let gitApiObject = await webApi.getGitApi()
@@ -15,7 +15,7 @@ export async function getAzureDevOpsProvider(orgUrl, token) {
   return gitApiObject
 }
 // made this a const since I was recalling it a bunch
-const gitApiObject = await getAzureDevOpsProvider(orgUrl, token)
+const gitApiObject = await getAzureDevOpsProvider()
 
 const fromDate = process.env.FROM_DATE
 const maxToFetch = process.env.MAX_RECORDS
